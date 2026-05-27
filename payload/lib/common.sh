@@ -110,6 +110,20 @@ install_aur_packages() {
   fi
 }
 
+install_flatpak_packages() {
+  local -n pkgs="$1"
+
+  [ ${#pkgs[@]} -eq 0 ] && return 0
+  command -v flatpak >/dev/null 2>&1 || return 0
+
+  echo "Installing Flatpak packages..."
+  local app
+  for app in "${pkgs[@]}"; do
+    echo "-> $app"
+    flatpak install --system --noninteractive -y flathub "$app" || true
+  done
+}
+
 enable_services() {
   local -n svcs="$1"
   [ ${#svcs[@]} -eq 0 ] && return 0
@@ -673,6 +687,59 @@ apply_theme_via_switcher_required() {
       fi
     fi
   fi
+}
+
+install_audio_base() {
+  local arch_user="$1"
+  local repo_root="$2"
+  local setup_script_source="$repo_root/shared/fl-miku-setup.sh"
+
+  echo "Setting up audio production environment..."
+
+  if [[ ! -f "$setup_script_source" ]]; then
+    echo "Missing fl-miku-setup.sh: $setup_script_source"
+    exit 1
+  fi
+
+  # Add the user to the realtime group so PipeWire/audio processes can request
+  # real-time scheduling priority (created by the realtime-privileges package).
+  if getent group realtime >/dev/null 2>&1; then
+    echo "Adding $arch_user to realtime group..."
+    sudo usermod -aG realtime "$arch_user"
+  else
+    echo "Warning: realtime group not found. Ensure realtime-privileges is installed."
+  fi
+
+  local user_home="/home/$arch_user"
+  local user_bin="$user_home/.local/bin"
+  local app_dir="$user_home/.local/share/applications"
+  local prefix_root="$user_home/.local/share/wineprefixes"
+  local setup_script="$user_bin/fl-miku-setup"
+
+  sudo -u "$arch_user" mkdir -p \
+    "$user_bin" \
+    "$app_dir" \
+    "$prefix_root" \
+    "$user_home/Installers/Audio/MikuV4X"
+
+  sudo -u "$arch_user" cp "$setup_script_source" "$setup_script"
+  sudo -u "$arch_user" chmod +x "$setup_script"
+
+  # Desktop entry so the setup wizard appears in KRunner immediately after install.
+  sudo -u "$arch_user" tee "$app_dir/fl-miku-setup.desktop" >/dev/null <<EOF
+[Desktop Entry]
+Name=Set Up FL Studio + Miku
+Comment=Initialise the fl-miku Wine prefix and install FL Studio
+Exec=$setup_script
+Icon=audio-x-generic
+Terminal=true
+Type=Application
+Categories=Audio;
+Keywords=fl;studio;miku;wine;setup;
+EOF
+
+  echo "Audio production environment ready."
+  echo "Run 'Set Up FL Studio + Miku' from KRunner after first login to complete setup."
 }
 
 install_wallpaper_autostart() {

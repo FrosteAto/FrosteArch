@@ -130,6 +130,10 @@ write_sudoers_rule
 # shellcheck source=/dev/null
 source "$MODE_FILE"
 
+if ! declare -p FLATPAK_PACKAGES >/dev/null 2>&1; then
+  FLATPAK_PACKAGES=()
+fi
+
 init_paths "$REPO_ROOT" "$ARCH_USER"
 
 FIRST_BOOT_DIALOG_TITLE="${FIRST_BOOT_DIALOG_TITLE:-FrosteArch}"
@@ -144,6 +148,7 @@ THEME_WALLPAPERS_DIR="${THEME_WALLPAPERS_DIR:-$REPO_ROOT/themes}"
 THEME_DEFAULT_ID="${THEME_DEFAULT_ID:-$MODE_NAME}"
 KARA_GIT_URL="${KARA_GIT_URL:-https://github.com/dhruv8sh/kara.git}"
 KARA_GIT_REF="${KARA_GIT_REF:-v1.0.0}"
+SETUP_AUDIO_PRODUCTION="${SETUP_AUDIO_PRODUCTION:-false}"
 
 log "Theme profiles source: $THEME_PROFILES_DIR"
 log "Theme wallpapers source: $THEME_WALLPAPERS_DIR"
@@ -163,6 +168,9 @@ install_yay "$ARCH_USER"
 section "Installing AUR packages"
 install_aur_packages "$ARCH_USER" AUR_PACKAGES
 
+section "Installing Flatpak packages"
+install_flatpak_packages FLATPAK_PACKAGES
+
 section "Configuring services and firewall"
 enable_services SERVICES_ENABLE
 mask_services SERVICES_MASK
@@ -174,6 +182,11 @@ configure_pam_kwallet
 
 section "Applying dotfiles"
 apply_dotfiles "$ARCH_USER" "$DOTFILES_DIR"
+
+if [[ "${SETUP_AUDIO_PRODUCTION:-false}" == "true" ]]; then
+  section "Setting up audio production environment"
+  install_audio_base "$ARCH_USER" "$REPO_ROOT"
+fi
 
 section "Installing Kara pager"
 install_kara_pager_from_source "$ARCH_USER" "$KARA_GIT_URL" "$KARA_GIT_REF"
