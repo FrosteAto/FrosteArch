@@ -47,8 +47,6 @@ FrosteArch Server is a lean profile tuned for long-running services, including P
 
 - Update desktop images
 - Update server konsave / dotfiles
-- Add automated FL Studio installation support through Wine.
-- Add automated VOCALOID 6 installation support and improve stability.
 - Nvidia support
 
 ---
