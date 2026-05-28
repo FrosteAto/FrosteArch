@@ -8,7 +8,7 @@ OFFICIAL_PACKAGES=(
   kdialog
   ufw nano btop fastfetch flatpak kitty dolphin
   firefox steam krita godot obs-studio audacity blender kdenlive libreoffice gwenview mpv easyeffects calf darktable anki
-  python python-markdown python-pip python-pipx python-virtualenv php composer nodejs npm docker docker-compose make cmake git archiso
+  python python-markdown python-pip python-pipx python-virtualenv php composer nodejs npm docker docker-compose make cmake git archisos partitionmanager
   cups cups-pdf print-manager sane skanlite hplip avahi nss-mdns
   libinput libwacom wacomtablet xf86-input-wacom
   noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu ttf-jetbrains-mono
